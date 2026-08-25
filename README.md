@@ -1,6 +1,5 @@
 # קובץ הנחיות ל‑GitHub Copilot Chat: תשובות בעברית בלי שיבושי כיווניות
 
-> [English](README.md)
 
 למה זה מיועד: התוסף GitHub Copilot Chat בתוך עורך הקוד Visual Studio Code. זה לא Copilot
 של Microsoft 365 ולא הצ'אט באתר של GitHub, אלא חלונית הצ'אט שנפתחת בתוך VS Code.
