@@ -1,0 +1,4 @@
+# Keep markdown files byte-identical across platforms.
+# Prevents line-ending normalization from touching bidirectional control characters.
+* text=auto eol=lf
+*.md -text
