@@ -1,76 +1,70 @@
-# Hebrew RTL Instructions for GitHub Copilot Chat
+# קובץ הנחיות ל‑GitHub Copilot Chat: תשובות בעברית בלי שיבושי כיווניות
 
-> [עברית](README.he.md)
+> [English](README.md)
 
-A drop-in instructions file that fixes bidirectional text corruption in GitHub Copilot Chat
-responses written in Hebrew inside Visual Studio Code.
+למה זה מיועד: התוסף GitHub Copilot Chat בתוך עורך הקוד Visual Studio Code. זה לא Copilot
+של Microsoft 365 ולא הצ'אט באתר של GitHub, אלא חלונית הצ'אט שנפתחת בתוך VS Code.
 
-**Scope:** the GitHub Copilot Chat extension inside the VS Code editor. Not Microsoft 365
-Copilot, and not the chat on github.com.
+## הבעיה
 
-## The problem
+מי שעובד עם GitHub Copilot Chat בעברית מכיר את התופעה: הנקודה שבסוף המשפט קופצת לתחילת
+השורה, הסוגריים מתהפכים, והמקף נוחת בצד הלא נכון. זה קורה בכל פעם שמונח באנגלית, שם של
+קובץ או קטע קוד יושבים באמצע משפט עברי.
 
-When Copilot answers in Hebrew and the sentence contains an English term, a file name or a
-code snippet, the punctuation between them breaks:
+זה לא באג בעברית אלא התנהגות של אלגוריתם הכיווניות של יוניקוד. סימני פיסוק הם תווים
+ניטרליים שאין להם כיוון משלהם, וכשתו ניטרלי נמצא בין רצף עברי לרצף לטיני הוא נצמד לרצף
+הלטיני ומוצג בקצה השני של השורה.
 
-- The period at the end of the sentence jumps to the beginning of the line.
-- Parentheses flip.
-- Hyphens and dashes land on the wrong side.
+## הפתרון
 
-This is not a Hebrew bug. Punctuation characters are *neutral* under the Unicode
-Bidirectional Algorithm: they have no direction of their own. When a neutral character sits
-between a Hebrew run and a Latin run, it is resolved against the surrounding paragraph
-direction and gets rendered on the opposite end of the line.
+קובץ ההנחיות מנחה את Copilot לעטוף כל שורת טקסט בהטמעת כיווניות של ימין‑לשמאל, כך שכל
+השורה נקראת כרצף אחד והפיסוק נשאר במקומו גם כשמשולבים בה מונחים לועזיים. בנוסף יש בו
+כללי כתיבה משלימים:
 
-## The fix
+- פתיחת כל שורה במילה עברית, ולא במונח לטיני או בקוד מוטבע.
+- הוצאת פקודות, נתיבים וחתימות ארוכות לבלוק קוד נפרד.
+- החלפת קו מפריד ארוך בין עברית לאנגלית בנקודתיים.
+- טיפול מפורש בסוגריים, במספרים, ביחידות מידה ובקישורי קבצים.
 
-The instructions file tells the model to wrap the text content of every paragraph, heading,
-list item and table cell in a right-to-left embedding, so the entire line is resolved as one
-RTL run and the punctuation stays put. It also adds complementary writing rules:
+## התקנה
 
-- Start every line with a Hebrew word, never with a Latin term or inline code.
-- Move long commands, paths and signatures into their own fenced code block.
-- Replace an em dash between Hebrew and English with a colon.
-- Handle parentheses, numbers, units and markdown file links explicitly.
+יש שני מיקומים אפשריים, ואפשר לבחור לפי הצורך.
 
-## Installation
+**1. ברמת המשתמש, לכל הפרויקטים**
 
-Pick one of the two locations.
+מעתיקים את הקובץ לתיקיית ההנחיות של VS Code:
 
-**1. User level, applies to every project**
-
-Copy the file into your VS Code user prompts folder:
-
-| OS | Path |
+| מערכת הפעלה | נתיב |
 | --- | --- |
 | Windows | `%APPDATA%\Code\User\prompts` |
 | macOS | `~/Library/Application Support/Code/User/prompts` |
 | Linux | `~/.config/Code/User/prompts` |
 
-**2. Project level, applies to everyone working on the repository**
+מכאן ההנחיה חלה בכל תיקיית עבודה ובכל שיחה, בלי קשר לפרויקט.
 
-Copy the file into `.github/instructions/` in your repository and commit it. Everyone who
-clones the repo gets the same behavior automatically.
+**2. ברמת הפרויקט, לכל מי שעובד על המאגר**
 
-No further configuration is needed. The file declares `applyTo: '**'` in its front matter,
-and VS Code loads it into every chat session on its own.
+מעתיקים את הקובץ לתיקייה `.github/instructions` בתוך המאגר ומבצעים commit. כך הקובץ נשמר
+ב‑Git יחד עם הקוד, וכל מי שמושך את המאגר מקבל את אותה ההתנהגות אוטומטית.
 
-## What this does not do
+בשני המקרים אין צורך בהגדרה נוספת. הקובץ מכיל בראשו `applyTo: '**'`, כלומר הוא חל על כל
+סוגי הקבצים, ו‑VS Code טוען אותו לבד לכל שיחה.
 
-It fixes character **order**, not **alignment**. The VS Code chat view is laid out
-left-to-right, and the `dir` attribute is stripped by the content sanitizer, so short lines
-will still hug the left edge. Full right alignment requires injecting CSS into the editor,
-which is outside the scope of this file.
+## מה הקובץ לא עושה
 
-## Notes
+הוא מתקן את סדר התווים, לא את היישור. חלונית הצ'אט של VS Code מוגדרת כשמאל‑לימין, ותכונת
+הכיווניות נחסמת בסינון התוכן, ולכן שורות קצרות עדיין ייצמדו לקצה השמאלי. יישור מלא לימין
+אפשרי רק בהזרקת CSS לעורך, וזה מחוץ לתחום של הקובץ הזה.
 
-- The file itself contains no invisible control characters, so it is safe to copy as is.
-- It is encoded as UTF-8 without BOM. Prefer downloading the raw file over copying from a
-  browser, since some browsers drop control characters on copy.
-- The rules are not specific to Hebrew. The same structure applies to Arabic, Persian, Urdu
-  and any other right-to-left script; only the examples are in Hebrew.
+## הערות
 
-## Feedback
+- הקובץ עצמו נקי מתווים בלתי נראים, ולכן אפשר להעתיק אותו כמו שהוא בלי חשש.
+- הקידוד הוא UTF-8 בלי BOM. עדיף להוריד את הקובץ הגולמי מאשר להעתיק אותו מהדפדפן, כי חלק
+  מהדפדפנים משמיטים תווי בקרה בהעתקה.
+- הכללים אינם ייחודיים לעברית. אותו מבנה תקף לערבית, לפרסית ולכל שפה דו‑כיוונית אחרת,
+  והדוגמאות בלבד הן בעברית.
 
-Issues and pull requests are welcome, especially edge cases the rules do not cover yet.
-When reporting one, please include the Copilot output you got and the output you expected.
+## משוב
+
+אשמח לדיווחים ולבקשות משיכה, במיוחד על מקרי קצה שהכללים עדיין לא מכסים. בדיווח כדאי לצרף
+את הפלט שהתקבל מ‑Copilot ואת הפלט שציפיתם לו.
